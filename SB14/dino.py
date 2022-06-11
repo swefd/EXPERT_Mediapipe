@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+import pyautogui
 
 cap = cv2.VideoCapture(0)
 
@@ -21,6 +22,15 @@ def draw_face_mask(img):
     cv2.line(img, (dots[13][0], dots[13][1]), (dots[14][0], dots[14][1]), (0, 0, 255), 2)
 
 
+def check_action():
+    L_upperPoint = dots[13][1]
+    L_lowerPoint = dots[14][1]
+
+    if diff_points_counter(L_upperPoint, L_lowerPoint) > 50:
+        print("Jump")
+        pyautogui.keyDown("space")
+
+
 while True:
     frame = cap.read()[1]
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -34,6 +44,7 @@ while True:
                 y = int(lm.y * height)
                 dots[idx] = [x, y, idx]
             draw_face_mask(frame)
+            check_action()
 
     cv2.imshow("Res", frame)
     cv2.waitKey(1)
