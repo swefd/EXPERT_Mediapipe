@@ -8,26 +8,32 @@ drawSpec = mp.solutions.drawing_utils.DrawingSpec(thickness=1, circle_radius=2, 
 mpFaceMesh = mp.solutions.face_mesh
 faceMesh = mpFaceMesh.FaceMesh()
 
+
+def diff_points_counter(a, b):
+    return abs(a - b)
+
+
+def draw_face_mask(img):
+    cv2.circle(img, (dots[13][0], dots[13][1]), 2, (255, 0, 0), 5)
+    cv2.circle(img, (dots[14][0], dots[14][1]), 2, (255, 0, 0), 5)
+    cv2.putText(img, str(diff_points_counter(dots[14][1], dots[13][1])),
+                (200, dots[14][1]), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
+    cv2.line(img, (dots[13][0], dots[13][1]), (dots[14][0], dots[14][1]), (0, 0, 255), 2)
+
+
 while True:
-   frame = cap.read()[1]
-   rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-   results = faceMesh.process(rgb)
-   if results.multi_face_landmarks:
-       for faces in results.multi_face_landmarks:
-           dots = {}
-           for idx, lm in enumerate(faces.landmark):
-               # print(f"x:{lm.x},y:{lm.y},z:{lm.z} index: {id}")
-               height, width, deep = frame.shape
-               x, y = (int(lm.x * width), int(lm.y * height))
-               dots[idx] = [x, y, idx]
-           print("point 13:", dots[13])
-           print("point 14:", dots[14])
-           cv2.putText(frame, str(13), (dots[13][0], dots[13][1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
-           cv2.putText(frame, str(14), (dots[14][0], dots[14][1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
-           cv2.line(frame, (dots[13][0], dots[13][1]), (dots[14][0], dots[14][1]), (255, 0, 0), 3)
-           diff = dots[14][1] - dots[13][1]
-           cv2.putText(frame, str(diff), (200, dots[14][1]), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 1)
-           cv2.circle(frame, (dots[13][0], dots[13][1]), 2, (0, 255, 0), 2)
-           cv2.circle(frame, (dots[14][0], dots[14][1]), 2, (0, 255, 0), 2)
-   cv2.imshow("frame", frame)
-   cv2.waitKey(1)
+    frame = cap.read()[1]
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = faceMesh.process(rgb)
+    if results.multi_face_landmarks:
+        for faces in results.multi_face_landmarks:
+            dots = {}
+            for idx, lm in enumerate(faces.landmark):
+                height, width, deep = frame.shape
+                x = int(lm.x * width)
+                y = int(lm.y * height)
+                dots[idx] = [x, y, idx]
+            draw_face_mask(frame)
+
+    cv2.imshow("Res", frame)
+    cv2.waitKey(1)
