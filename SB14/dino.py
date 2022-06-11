@@ -2,6 +2,9 @@ import cv2
 import mediapipe as mp
 import pyautogui
 
+playGame = False
+drawFaceMask = False
+
 cap = cv2.VideoCapture(0)
 
 mpDraw = mp.solutions.drawing_utils
@@ -26,9 +29,20 @@ def check_action():
     L_upperPoint = dots[13][1]
     L_lowerPoint = dots[14][1]
 
+    F_upperPoint = dots[10][1]
+    F_lowerPoint = dots[164][1]
+
+    print(diff_points_counter(F_upperPoint, F_lowerPoint))
+
     if diff_points_counter(L_upperPoint, L_lowerPoint) > 50:
         print("Jump")
         pyautogui.keyDown("space")
+
+    if diff_points_counter(F_upperPoint, F_lowerPoint) > 300:
+        print("DOWN")
+        pyautogui.keyDown("down")
+    else:
+        pyautogui.keyUp("down")
 
 
 while True:
@@ -43,8 +57,20 @@ while True:
                 x = int(lm.x * width)
                 y = int(lm.y * height)
                 dots[idx] = [x, y, idx]
-            draw_face_mask(frame)
-            check_action()
+
+            key = cv2.waitKey(1)
+
+            if key == ord('p'):
+                playGame = not playGame
+                print("GAME MODE IS: " + str(playGame))
+            elif key == ord('m'):
+                drawFaceMask = not drawFaceMask
+                print("FaceMask IS: " + str(drawFaceMask))
+
+            if playGame:
+                check_action()
+            if drawFaceMask:
+                draw_face_mask(frame)
 
     cv2.imshow("Res", frame)
     cv2.waitKey(1)
